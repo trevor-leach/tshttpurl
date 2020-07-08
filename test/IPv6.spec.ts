@@ -218,6 +218,8 @@ describe('IPv6', () => {
         it('should only collapse the longer string of zero parts', () => {
             ipv6 = new IPv6("1:0:0:4:0:0:0:8");
             expect(ipv6.toIPv6String()).to.equal("1:0:0:4::8");
+            ipv6 = new IPv6("1:0:0:0:4:0:0:8");
+            expect(ipv6.toIPv6String()).to.equal("1::4:0:0:8");
         })
 
         it('should properly collapse a trailing string of zero parts', () => {

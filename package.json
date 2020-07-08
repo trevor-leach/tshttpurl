@@ -1,23 +1,33 @@
 {
   "name": "tshttpurl",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Http URL parser and normalizer",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "mocha -r ts-node/register ./**/*.spec.ts"
+    "clean": "rm -rf dist docs",
+    "build": "tsc",
+    "test": "mocha -r ts-node/register ./**/*.spec.ts",
+    "docs": "typedoc --theme minimal --out docs src"
   },
-  "author": "Trevor Leach",
+  "author": {
+    "name": "Trevor Leach",
+    "email": "r33fshark-github@yahoo.com",
+    "url": "https://github.com/trevor-leach"
+  },
   "license": "ISC",
   "dependencies": {},
   "devDependencies": {
-    "@types/chai": "^4.2.0",
+    "@types/chai": "^4.2.11",
     "@types/mocha": "^5.2.7",
     "chai": "^4.2.0",
-    "mocha": "^6.2.0",
-    "ts-node": "^8.3.0",
-    "typescript": "^3.7.3"
+    "jsdoc": "^3.6.4",
+    "mocha": "^6.2.3",
+    "ts-node": "^8.10.2",
+    "typedoc": "^0.17.8",
+    "typescript": "^3.9.6"
   }
 }

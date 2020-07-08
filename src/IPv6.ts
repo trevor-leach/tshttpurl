@@ -478,9 +478,9 @@ export class IPv6
 
     /**
      * Determines whether the passed in value represents the same value as 
-	 * this instance
+     * this instance
      * @param other The address to use as a comparison.
-	 *        null or malformed addresses result in false being returned.
+     *        null or malformed addresses result in false being returned.
      * @returns boolean
      */
     public equals(other: IPv6|bigint|string|null): boolean

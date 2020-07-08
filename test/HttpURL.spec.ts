@@ -65,4 +65,9 @@ describe('HttpURL', () => {
         testThat(new HttpURL('a?b=c&a').query).comparesInOrderTo(['a','b=c'],qCompare);
         testThat(new HttpURL('a?b=c;a=;C=%64').query).comparesInOrderTo(['C=d','a','b=c'],qCompare);
     });
+
+    it('Should print the normalized value of the URL', () => {
+        expect(new HttpURL('Foo.org/a/./c/../B//%64/CR%9a?b=c;a=;C=%64#').toString()).
+            to.equal('http://foo.org:80/a/B/d/CR%9A?C=d&a&b=c');
+    })
 })

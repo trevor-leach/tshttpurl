@@ -1,5 +1,19 @@
 import {IPv6} from './IPv6'
 
+/**
+ * HttpURL parses and normalizes http and https URLs.
+ *   * A missing scheme is assumed to be `http`
+ *   * The scheme and host are converted to lowercase
+ *        * If the host is an IP V6 address, then IPv6::toString value is used
+ *   * A missing port is assumed to be `80` or `443`
+ *   * Percent encoded triplets are converted to upper case
+ *   * Unnecessary percent encoded triplets are decoded
+ *   * Path traversals:
+ *       * `.` and `..`are interpreted
+ *       * `//` is collapsed
+ *       * The path is verified to not climb out past the root
+ *   * Query parameters are ordered by name, then value
+ */
 export class HttpURL
 {
     private static pctXX = new RegExp('%([\\da-f]{2})', 'gi');
@@ -107,6 +121,8 @@ export class HttpURL
             this.path = [];
         }
 
+        Object.freeze(this.path);
+
         this.isDir =  0 === this.path.length ||
                 '/' === parts[6].charAt(parts[6].length-1) ;
 
@@ -117,57 +133,100 @@ export class HttpURL
             this.query.sort(QueryParam.compare);
         }
 
+        Object.freeze(this.query);
+
         if (parts[8]) {
             this.fragment = parts[8];
         }
     }
 
+    /**
+     * @returns The normalized http URL.
+     */
     toString(): string {
         let theHost: string = this.host
         if (this.ipAddress && !this.ipAddress.isIPv4()) {
             theHost = `[${this.host}]`
         }
-        const str: string = `${this.scheme}://${theHost}:${this.port}`
-            + this.path.length ? this.path.join('/') : ''
-            + this.isDir ? '/' : ''
-            + this.query.length ? `?${this.query.join('&')}` : ''
-            + this.fragment || '';
+        const str: string = `${this.scheme}://${theHost}:${this.port}` +
+            (this.path.length ? '/' + this.path.join('/') : '') +
+            (this.isDir ? '/' : '') +
+            (this.query.length ? `?${this.query.join('&')}` : '') +
+            (this.fragment || '');
 
         this.toString = () => str; // memoize the string representation
 
         return str;
     }
 
+
+    /**
+     * Function used to determine the order of `HttpURL`s.  It is suitable
+     * for use with `Array<T>.sort(fn)`.  If an argument is not an `HttpURL`,
+     * then its toString() value is used to create one.
+     * 
+     * `HttpURL`s are ordered by thier string representation
+     * 
+     * @param a The first http URL to compare
+     * @param b The second http URL to compare
+     */
     static compare(a: Object, b: Object): number {
 
-        let ua = a instanceof HttpURL ? a : new HttpURL(a.toString());
-        let ub = b instanceof HttpURL ? b : new HttpURL(b.toString());
+        let ua = (a instanceof HttpURL ? a : new HttpURL(a.toString())).toString();
+        let ub = (b instanceof HttpURL ? b : new HttpURL(b.toString())).toString();
 
         return ua < ub
                 ? -1
                 : (ua > ub ? 1 : 0);
     }
-    }
+}
 
-    export class QueryParam
-    {
-    constructor(readonly name: string, readonly value?: string) {
+export class QueryParam
+{
+    readonly name:  string;
+    readonly value: string;
+    /**
+     * Creates a QueryParam instance.
+     * @param name The name of the query parameter.  The value may optionally
+     *          be included. E.g. "age=65"
+     * @param value The value, if not included in the name parameter.
+     * 
+     * @throws Error if a value is included in both name and value
+     */
+    constructor(name: string, value?: string) {
 
         let eqIdx = name.indexOf('=');
 
         if (0 <= eqIdx) {
-            if (value) throw new Error('Value specified with in name and value parameters.');
+            if (value) throw new Error('Value specified in both name and value parameters.');
 
-            name  = name.substr(0, eqIdx);
             value = name.substr(eqIdx + 1);
+            name  = name.substr(0, eqIdx);
         }
+
+        this.name = name;
+        this.value = value;
     };
 
     toString(): string {
 
-        return this.value ? `${this.name}=${this.value}` : this.name;
+        const str = this.value ? `${this.name}=${this.value}` : this.name;
+
+        this.toString = () => str; // memoize the string representation
+
+        return str;
     };
 
+    /**
+     * Function used to determine the order of `QueryParam`s.  It is suitable
+     * for use with `Array<T>.sort(fn)`.  If an argument is not a `QueryParam`,
+     * then its toString() value is used to create one.
+     * 
+     * `QueryParam`s are ordered by thier name, and then their value.
+     * 
+     * @param a The first query parameter to compare
+     * @param b The second query parameter to compare
+     */
     static compare(a: Object, b: Object): number {
 
         let qa = a instanceof QueryParam ? a : new QueryParam(a.toString());
