@@ -4,6 +4,9 @@
   "description": "Http URL parser and normalizer",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
+  "files": [
+    "dist/**"
+  ],
   "directories": {
     "test": "test"
   },
