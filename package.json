@@ -1,12 +1,18 @@
 {
   "name": "tshttpurl",
-  "version": "0.0.2",
-  "description": "Http URL parser and normalizer",
+  "version": "0.0.3",
+  "description": "Http URL and IP address parser and normalizer",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/trevor-leach/tshttpurl.git"
+  },
+  "keywords": ["http", "url", "ip", "ipv6", "ipv4", "ipv4-address",
+               "ipv6-address", "parse", "parser", "normalizer"],
   "main": "dist/src/index.js",
   "types": "dist/types/src/index.d.ts",
   "files": [
-	"dist/src/**",
-	"dist/types/src/**"
+    "dist/src/**",
+    "dist/types/src/**"
   ],
   "directories": {
     "test": "test"

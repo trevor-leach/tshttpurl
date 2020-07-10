@@ -1,3 +1,5 @@
+import {assert} from "chai"
+
 class TestUtils {
 
     private actual: any;
@@ -14,47 +16,47 @@ class TestUtils {
      * 
      * @param compareFn optional comparison function
      *        for the array elements.
-     *        
-     * @return true if expected and acutal contain equal elements in the
-     *         same order, false otherwise.
      */
     public comparesInOrderTo<T, T1 extends T, T2 extends T>(
         expected: Array<T2>, 
-        compareFn?:  (a:T, b:T)=>number ): boolean
+        compareFn?:  (a:T, b:T)=>number ): void
     {
-        this.actual = <Array<T1>> this.actual;
-        var isEqual = this.actual.length === expected.length;
+        const actual = (<Array<T1>> this.actual);
+        assert.equal(this.actual.length, expected.length,
+            `actual.length != expected.length`);
         
-        for (let i = this.actual.length -1; 0 <= i && isEqual; i -= 1) {
+        actual.forEach((actuali, i) => {
 
-            let actualHas = this.actual.hasOwnProperty(i);
-
-            if (actualHas !== expected.hasOwnProperty(i)) {
-                isEqual = false;
-            } else if (actualHas) {
+            if (!expected.hasOwnProperty(i)) {
+                assert.fail(`actual and expected do not both have element ${i}`)
+            } else {
                 if (compareFn) {
-                    isEqual = 0 === compareFn(this.actual[i], expected[i]);
+                    const comparison = compareFn(actual[i], expected[i]);
+                    assert.strictEqual(0, comparison,
+`
+actual[${i}]:   ${actual[i]}
+expected[${i}]: ${expected[i]}
+compareFn(actual[${i}], expected[${i}]) returned ${comparison}`);
                 } else {
-                    isEqual = Object.is(this.actual[i], expected[i]);
+                    assert.equal(this.actual[i], expected[i],
+`
+actual[${i}]:   ${actual[i]}
+expected[${i}]: ${expected[i]}
+actual[${i}] != expected[${i}]`);
                 }
             }
-        }
-        
-        return isEqual;
+        });
     };
 
     /**
      * Compares expected.toUpperCase() against actual.toUpperCase()
      * 
      * @param expected Converted to string with `toString()`
-     * 
-     * @returns true if expected equals actual ignoring case, false
-     *          otherwise.
      */
-    public equalsIgnoreCase(expected: any): boolean
+    public equalsIgnoreCase(expected: any): void
     {
-        return this.actual.toString().toUpperCase() === 
-                    expected.toString().toUpperCase();
+        assert.strictEqual(this.actual.toString().toUpperCase(), 
+                    expected.toString().toUpperCase());
     };
 
     /**
@@ -65,12 +67,15 @@ class TestUtils {
      * 
      * @param {function(*,*)} compareFn The comparison function with
      *        which to perform the comparison.
-     * 
-     * @returns  0 == compareFn(actual, expected)
      */
-    public comparesEquallyTo<T> (expected: T, compareFn:  (a:T, b:T)=>number ): boolean
+    public comparesEquallyTo<T> (expected: T, compareFn:  (a:T, b:T)=>number ): void
     {
-        return 0 == compareFn(this.actual as T, expected);
+        const comparison = compareFn(this.actual as T, expected);
+        assert.strictEqual( 0, comparison,
+`
+actual:   ${this.actual}
+expected: ${expected}
+compareFn(actual, expected) returned ${comparison}`);
     };
     
     /**
@@ -81,12 +86,15 @@ class TestUtils {
      * 
      * @param {function(*,*)} compareFn The comparison function with
      *        which to perform the comparison.
-     * 
-     * @returns  compareFn(actual, expected) < 0
      */
-    public comparesLessThan<T> (expected: T, compareFn: (a:T, b:T)=>number): boolean
+    public comparesLessThan<T> (expected: T, compareFn: (a:T, b:T)=>number): void
     {
-        return compareFn(this.actual, expected) < 0;
+        const comparison = compareFn(this.actual, expected)
+        assert.isBelow(comparison, 0,
+`
+actual:   ${this.actual}
+expected: ${expected}
+compareFn(actual, expected) returned ${comparison}`);
     };
 
     /**
@@ -97,30 +105,16 @@ class TestUtils {
      * 
      * @param {function(*,*)} compareFn The comparison function with
      *        which to perform the comparison.
-     * 
-     * @returns  0 < compareFn(actual, expected)
      */
-    public comparesGreaterThan<T> (expected: T, compareFn: (a:T, b:T)=>number): boolean
+    public comparesGreaterThan<T> (expected: T, compareFn: (a:T, b:T)=>number): void
     {
-        return 0 < compareFn(this.actual, expected);
+        const comparison = compareFn(this.actual, expected)
+        assert.isAbove(comparison, 0,
+`
+actual:   ${this.actual}
+expected: ${expected}
+compareFn(actual, expected) returned ${comparison}`);
     };
-
-
-    public isInstanceOf (type: Function) {
-        
-        return this.actual instanceof type;
-    }
-
-    /**
-     * Equates actual to expected using the 'equals with coercion' operator `==`
-     * rather than Chai's to.equal(any) use of strict equality `===`.
-     * @param expected 
-     * @returns actual == expected
-     */
-    public laxEquals (expected: any): boolean
-    {
-        return this.actual == expected;
-    }
 };
 
 export function testThat(actual: any): TestUtils {

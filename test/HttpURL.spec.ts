@@ -64,6 +64,7 @@ describe('HttpURL', () => {
         testThat(new HttpURL('http://a?#a').query).comparesInOrderTo([],qCompare);
         testThat(new HttpURL('a?b=c&a').query).comparesInOrderTo(['a','b=c'],qCompare);
         testThat(new HttpURL('a?b=c;a=;C=%64').query).comparesInOrderTo(['C=d','a','b=c'],qCompare);
+        testThat(new HttpURL('a?b=c;a=;C=d=1%26e=2').query).comparesInOrderTo(['C=d=1%26e=2','a','b=c'],qCompare);
     });
 
     it('Should print the normalized value of the URL', () => {
